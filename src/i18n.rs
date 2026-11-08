@@ -3,9 +3,9 @@ use enzui_core::localization::{self, CatalogBuilder, Localizer};
 pub(crate) fn from_environment() -> Localizer {
     let mut catalog = CatalogBuilder::new();
     for (locale, source) in [
-        ("en-US", include_str!("../locales/en-US.ftl")),
-        ("de", include_str!("../locales/de.ftl")),
-        ("ar", include_str!("../locales/ar.ftl")),
+        ("en-US", include_str!("../assets/locales/en-US.ftl")),
+        ("de", include_str!("../assets/locales/de.ftl")),
+        ("ar", include_str!("../assets/locales/ar.ftl")),
     ] {
         catalog
             .add_resource(locale, source)

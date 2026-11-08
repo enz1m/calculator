@@ -23,3 +23,6 @@ both themes, at the minimum size and with keyboard input. Use disposable XDG
 config/data directories for review, and capture the actual app window.
 
 Contributions use the MIT license. Preserve third-party notices.
+
+Translation catalogs live in `assets/locales/`; keep English, German and Arabic
+message keys aligned when adding or changing user-facing text.
