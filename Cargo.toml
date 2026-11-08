@@ -1,0 +1,55 @@
+[package]
+name = "enz-calculator"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95"
+license = "MIT"
+description = "A native enzUI calculator with scientific expressions and unit conversion"
+repository = "https://github.com/enz1m/calculator"
+publish = false
+
+[workspace]
+resolver = "3"
+
+[dependencies]
+iced = { git = "https://github.com/enz1m/enzim-iced.git", rev = "67f991b7442cbd79821141069c3b864cc12413f2", features = ["wgpu", "tiny-skia", "crisp", "web-colors", "thread-pool", "linux-theme-detection", "wayland", "svg", "a11y", "tokio"], default-features = false }
+enzui-core = { features = ["accesskit"], git = "https://github.com/enz1m/enzui.git", tag = "v0.1.0-alpha.1" }
+enzui-theme = { git = "https://github.com/enz1m/enzui.git", tag = "v0.1.0-alpha.1" }
+enzui-widgets = { features = ["application-dbus"], git = "https://github.com/enz1m/enzui.git", tag = "v0.1.0-alpha.1" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+dirs = "5"
+
+[dev-dependencies]
+tempfile = "3"
+
+[profile.dev]
+debug = "line-tables-only"
+incremental = true
+
+[profile.dev.package."*"]
+opt-level = 2
+debug = 0
+incremental = false
+
+[profile.test]
+debug = 0
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+correctness = { level = "deny", priority = -1 }
+unwrap_used = "warn"
+
+[patch.crates-io]
+zbus_macros = { git = "https://github.com/enz1m/enzim-zbus.git", rev = "815a9ca7b64aa24e14ccb6ea3f7eda97ef7bbc8a" }
+zbus_names = { git = "https://github.com/enz1m/enzim-zbus.git", rev = "815a9ca7b64aa24e14ccb6ea3f7eda97ef7bbc8a" }
+zvariant = { git = "https://github.com/enz1m/enzim-zbus.git", rev = "815a9ca7b64aa24e14ccb6ea3f7eda97ef7bbc8a" }
+zvariant_derive = { git = "https://github.com/enz1m/enzim-zbus.git", rev = "815a9ca7b64aa24e14ccb6ea3f7eda97ef7bbc8a" }
+zvariant_utils = { git = "https://github.com/enz1m/enzim-zbus.git", rev = "815a9ca7b64aa24e14ccb6ea3f7eda97ef7bbc8a" }
+zbus = { git = "https://github.com/enz1m/enzim-zbus.git", rev = "815a9ca7b64aa24e14ccb6ea3f7eda97ef7bbc8a" }
+winit = { git = "https://github.com/enz1m/enzim-winit.git", rev = "f6ce16941bf815a438db7e628ab1126ce48e31dd" }
+
+[features]
+x11 = ["iced/x11", "enzui-widgets/x11"]
