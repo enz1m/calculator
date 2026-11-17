@@ -71,7 +71,7 @@ cargo build --locked
 cargo run --locked
 ```
 
-The app uses [enzUI Alpha 0.1](https://github.com/enz1m/enzui/releases/tag/v0.1.0-alpha.1)
+The app uses [enzUI Alpha 0.2](https://github.com/enz1m/enzui/releases/tag/v0.2.0-alpha.1)
 and pinned public enzim forks. Cargo downloads all sources; no framework
 submodule, sibling checkout or private SDK is needed. Commit Cargo.lock when
 updating dependencies. Wayland is the default; build with `--features x11` for
