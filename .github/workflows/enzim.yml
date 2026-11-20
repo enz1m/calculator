@@ -1,0 +1,32 @@
+# Managed by enzim Apps. Build policy lives in the pinned reusable workflow.
+name: enzim Store build
+run-name: enzim build ${{ inputs.ticket }}
+on:
+  workflow_dispatch:
+    inputs:
+      source_commit:
+        required: true
+        type: string
+      manifest_path:
+        required: true
+        type: string
+      app_id:
+        required: true
+        type: string
+      ticket:
+        required: true
+        type: string
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+jobs:
+  flatpak:
+    uses: enz1m/enzimos-app-submissions/.github/workflows/build-flatpak.yml@0bcec4e4cf7b9ad6aadc9935a16a2b1a2b485896
+    with:
+      source_commit: ${{ inputs.source_commit }}
+      manifest_path: ${{ inputs.manifest_path }}
+      app_id: ${{ inputs.app_id }}
+      ticket: ${{ inputs.ticket }}
+    secrets:
+      app_configuration: ${{ secrets.ENZIM_BUILD_CONFIG }}
