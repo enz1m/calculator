@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Calculator
+Comment=Evaluate expressions and convert units
+Exec=enz-calculator
+Icon=org.enzimos.Calculator
+Terminal=false
+Categories=Utility;Calculator;
+Keywords=Calculator;Math;Scientific;Conversion;
+StartupNotify=true

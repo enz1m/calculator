@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.enzimos.Calculator</id>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Calculator</name>
+  <summary>Evaluate expressions and convert units</summary>
+  <description>
+    <p>Calculator evaluates basic and scientific expressions, converts units, and keeps recent results available in a reusable history.</p>
+  </description>
+  <developer id="io.github.enz1m">
+    <name>enzUI contributors</name>
+  </developer>
+  <launchable type="desktop-id">org.enzimos.Calculator.desktop</launchable>
+  <url type="homepage">https://github.com/enz1m/calculator</url>
+  <url type="bugtracker">https://github.com/enz1m/calculator/issues</url>
+  <screenshots>
+    <screenshot type="default">
+      <caption>Calculator with a history of recent expressions</caption>
+      <image>https://raw.githubusercontent.com/enz1m/calculator/a4b7ce0430891111d98a35a552a99197e465c282/docs/screenshots/basic-light.png</image>
+    </screenshot>
+  </screenshots>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="0.1.1" date="2026-11-20">
+      <description><p>Add Flatpak packaging for enzim Apps.</p></description>
+    </release>
+  </releases>
+</component>

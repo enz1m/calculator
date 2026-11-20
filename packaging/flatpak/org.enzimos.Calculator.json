@@ -1,0 +1,54 @@
+{
+  "app-id": "org.enzimos.Calculator",
+  "branch": "stable",
+  "runtime": "org.freedesktop.Platform",
+  "runtime-version": "26.08",
+  "sdk": "org.freedesktop.Sdk",
+  "sdk-extensions": [
+    "org.freedesktop.Sdk.Extension.rust-stable"
+  ],
+  "command": "enz-calculator",
+  "finish-args": [
+    "--socket=wayland",
+    "--device=dri"
+  ],
+  "build-options": {
+    "append-path": "/usr/lib/sdk/rust-stable/bin"
+  },
+  "modules": [
+    {
+      "name": "calculator",
+      "buildsystem": "simple",
+      "build-commands": [
+        "cargo build --locked --offline --release --jobs \"${FLATPAK_BUILDER_N_JOBS:-2}\"",
+        "install -Dm755 target/release/enz-calculator /app/bin/enz-calculator",
+        "install -Dm644 packaging/flatpak/org.enzimos.Calculator.desktop /app/share/applications/org.enzimos.Calculator.desktop",
+        "install -Dm644 packaging/flatpak/org.enzimos.Calculator.metainfo.xml /app/share/metainfo/org.enzimos.Calculator.metainfo.xml",
+        "install -Dm644 assets/calculator.svg /app/share/icons/hicolor/scalable/apps/org.enzimos.Calculator.svg",
+        "install -Dm644 assets/calculator.png /app/share/icons/hicolor/512x512/apps/org.enzimos.Calculator.png",
+        "install -Dm644 LICENSE /app/share/licenses/org.enzimos.Calculator/LICENSE",
+        "install -Dm644 assets/calculator-icon.LICENSE /app/share/licenses/org.enzimos.Calculator/calculator-icon.LICENSE"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/enz1m/calculator.git",
+          "commit": "@ENZIM_SOURCE_COMMIT@",
+          "disable-submodules": true
+        },
+        {
+          "type": "archive",
+          "url": "https://github.com/enz1m/calculator/releases/download/v0.1.1/calculator-cargo-vendor-0.1.1.tar.xz",
+          "sha256": "c8ea22cfa6a0ef69f4a038e8286d995eaa29d120fbcb210d633af05902ee47a3",
+          "strip-components": 1
+        },
+        {
+          "type": "file",
+          "url": "https://raw.githubusercontent.com/enz1m/enzim-winit/40eeb41f8637ef1620afa377ba006874224b6d65/wayland-protocols/xdg-session-management-v1.xml",
+          "sha256": "3674591ca8e68f76297c535e8edd6783d84b59086c38ebe08ff5ff1f2dec5bae",
+          "dest": "vendor/winit-0.30.13/wayland-protocols"
+        }
+      ]
+    }
+  ]
+}
