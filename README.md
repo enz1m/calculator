@@ -90,7 +90,14 @@ The latest 100 calculations are stored in
 Memory is session-only. History writes are atomic; a lock prevents competing
 writers. Invalid, oversized, symlinked or non-regular history files are preserved
 and saving is disabled for that session. A second launch activates the running
-window when a session bus is available. The app uses no network services.
+window when a session bus is available.
+
+## Privacy
+
+Calculator collects no analytics and sends no data over the network.
+Calculation history stays on your device. Use **Clear history** in the app
+to remove it. Memory stays in the current session. Clipboard and drag-and-drop
+share text with another app when you choose to transfer it.
 
 ## Development checks
 
