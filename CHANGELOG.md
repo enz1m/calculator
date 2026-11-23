@@ -2,8 +2,8 @@
 
 ## 0.1.3
 
-- Update enzUI and its paired iced fork for nonblocking Wayland presentation discovery.
-- Pick up smoother sidebar transitions and centered view switchers from enzUI.
+- The Calculator window can appear without waiting for display setup on Wayland.
+- Opening and closing the sidebar is smoother, making it easier to switch between a calculation and your history.
 
 ## 0.1.0 — initial preview
 

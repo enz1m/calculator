@@ -24,8 +24,8 @@
   <releases>
     <release version="0.1.3" date="2026-11-23">
       <description>
-        <p>Update enzUI and its paired iced fork for nonblocking Wayland presentation discovery.</p>
-        <p>Pick up smoother sidebar transitions and centered view switchers from enzUI.</p>
+        <p>The Calculator window can appear without waiting for display setup on Wayland.</p>
+        <p>Opening and closing the sidebar is smoother, making it easier to switch between a calculation and your history.</p>
       </description>
     </release>
     <release version="0.1.2" date="2026-11-21"/>
