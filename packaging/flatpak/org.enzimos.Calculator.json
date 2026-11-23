@@ -38,8 +38,8 @@
         },
         {
           "type": "archive",
-          "url": "https://github.com/enz1m/calculator/releases/download/v0.1.2/calculator-cargo-vendor-0.1.2.tar.xz",
-          "sha256": "bf1eed31f8f05097ac0b03a4ee03cbf625f8092a1d22aa13f71fab9500d4ee60",
+          "url": "https://github.com/enz1m/calculator/releases/download/v0.1.3/calculator-cargo-vendor-0.1.3.tar.xz",
+          "sha256": "c55008d38c69d9c5cd53c51cd70c4cd9a5d9bb6d1c4784c36f1c0271b0303a68",
           "strip-components": 1
         },
         {
