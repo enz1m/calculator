@@ -43,6 +43,28 @@ pub(crate) fn evaluate(input: &str, degrees: bool, answer: f64) -> Result<f64, C
     finite(result)
 }
 
+// Results within a few ulps of the operands' magnitude are binary rounding residue.
+const RESIDUE: f64 = 4.0 * f64::EPSILON;
+
+// Large angles keep their result: there the tolerance would swallow real values.
+fn without_residue(value: f64, operand_scale: f64) -> f64 {
+    let tolerance = operand_scale.abs() * RESIDUE;
+    if tolerance < 1e-9 && value.abs() <= tolerance {
+        0.0
+    } else {
+        value
+    }
+}
+
+// A sum is only as precise as its larger operand, so digits below that are dropped.
+fn settled_sum(value: f64, operand_scale: f64) -> f64 {
+    let quantum = 10f64.powi((operand_scale.abs() * RESIDUE).log10().ceil() as i32);
+    if !quantum.is_normal() || !value.is_finite() {
+        return value;
+    }
+    (value / quantum).round() * quantum
+}
+
 fn finite(value: f64) -> Result<f64, CalcError> {
     if value.is_finite() {
         Ok(value)
@@ -127,8 +149,8 @@ impl Parser<'_> {
             self.pos += 1;
             let rhs = self.expression(right)?;
             lhs = finite(match operator {
-                b'+' => lhs + rhs,
-                b'-' => lhs - rhs,
+                b'+' => settled_sum(lhs + rhs, lhs.abs().max(rhs.abs())),
+                b'-' => settled_sum(lhs - rhs, lhs.abs().max(rhs.abs())),
                 b'*' => lhs * rhs,
                 b'/' => {
                     if rhs == 0.0 {
@@ -168,33 +190,45 @@ impl Parser<'_> {
             if !self.take(b')') {
                 return Err(CalcError::Syntax);
             }
-            let angle = if self.degrees { x.to_radians() } else { x };
-            finite(match name {
-                b"sin" => angle.sin(),
-                b"cos" => angle.cos(),
-                b"tan" => {
+            let turn_degrees = x.rem_euclid(360.0);
+            let quarter_turn = (self.degrees && turn_degrees % 90.0 == 0.0)
+                .then_some(turn_degrees / 90.0)
+                .map(|quarters| quarters as u8 % 4);
+            let angle = if self.degrees {
+                turn_degrees.to_radians()
+            } else {
+                x
+            };
+            finite(match (name, quarter_turn) {
+                (b"sin", Some(quarters)) => [0.0, 1.0, 0.0, -1.0][usize::from(quarters)],
+                (b"cos", Some(quarters)) => [1.0, 0.0, -1.0, 0.0][usize::from(quarters)],
+                (b"tan", Some(0 | 2)) => 0.0,
+                (b"tan", Some(_)) => return Err(CalcError::Domain),
+                (b"sin", None) => without_residue(angle.sin(), angle),
+                (b"cos", None) => without_residue(angle.cos(), angle),
+                (b"tan", None) => {
                     if angle.cos().abs() < 1e-14 {
                         return Err(CalcError::Domain);
                     }
-                    angle.tan()
+                    without_residue(angle.tan(), angle)
                 }
-                b"asin" => {
+                (b"asin", _) => {
                     let v = x.asin();
                     if self.degrees { v.to_degrees() } else { v }
                 }
-                b"acos" => {
+                (b"acos", _) => {
                     let v = x.acos();
                     if self.degrees { v.to_degrees() } else { v }
                 }
-                b"atan" => {
+                (b"atan", _) => {
                     let v = x.atan();
                     if self.degrees { v.to_degrees() } else { v }
                 }
-                b"sqrt" => x.sqrt(),
-                b"ln" => x.ln(),
-                b"log" => x.log10(),
-                b"abs" => x.abs(),
-                b"exp" => x.exp(),
+                (b"sqrt", _) => x.sqrt(),
+                (b"ln", _) => x.ln(),
+                (b"log", _) => x.log10(),
+                (b"abs", _) => x.abs(),
+                (b"exp", _) => x.exp(),
                 _ => return Err(CalcError::Syntax),
             })
         } else {
@@ -230,7 +264,8 @@ pub(crate) fn format_number(value: f64) -> String {
     if value.abs() >= 1e12 || value.abs() < 1e-9 {
         return format!("{value:.10e}");
     }
-    let places = (11 - value.abs().log10().floor() as i32).clamp(0, 12) as usize;
+    let significant_places = 11 - value.abs().log10().floor() as i32;
+    let places = significant_places.clamp(0, 20) as usize;
     let output = format!("{value:.places$}");
     if output.contains('.') {
         output.trim_end_matches('0').trim_end_matches('.').into()
@@ -262,16 +297,34 @@ mod tests {
                 "{input}"
             );
         }
-        assert_eq!(
-            format_number(evaluate("0.1+0.2", true, 0.0).expect("decimal")),
-            "0.3"
-        );
+        for (input, degrees, shown) in [
+            ("0.1+0.2", true, "0.3"),
+            ("0.1+0.2-0.3", true, "0"),
+            ("sin(180)", true, "0"),
+            ("cos(90)", true, "0"),
+            ("cos(-180)", true, "-1"),
+            ("tan(540)", true, "0"),
+            ("sin(pi)", false, "0"),
+            ("1.23456789012e-7", true, "0.000000123456789012"),
+            ("sin(-1e-20)", true, "0"),
+            ("123456789+0.000001-123456789", true, "0.000001"),
+            ("1e-300+1e-300", true, "2.0000000000e-300"),
+        ] {
+            assert_eq!(
+                format_number(evaluate(input, degrees, 0.0).expect(input)),
+                shown,
+                "{input}"
+            );
+        }
         assert!((evaluate("sin(pi/2)", false, 0.0).expect("radians") - 1.0).abs() < 1e-10);
+        assert!(evaluate("sin(1e20)", false, 0.0).expect("radians").abs() > 0.1);
     }
     #[test]
     fn calculator_rejects_invalid_and_unbounded_input() {
         assert_eq!(evaluate("1/0", true, 0.0), Err(CalcError::DivisionByZero));
-        for expression in ["sqrt(-1)", "ln(0)", "171!", "2.5!", "tan(90)", "10^1000"] {
+        for expression in [
+            "sqrt(-1)", "ln(0)", "171!", "2.5!", "tan(90)", "tan(-90)", "10^1000",
+        ] {
             assert_eq!(evaluate(expression, true, 0.0), Err(CalcError::Domain));
         }
         for expression in ["", "2+", "(2", "2)", "garbage(2)", "1..2", "2 3"] {
