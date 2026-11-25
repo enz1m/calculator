@@ -12,10 +12,10 @@ publish = false
 resolver = "3"
 
 [dependencies]
-iced = { git = "https://github.com/enz1m/enzim-iced.git", rev = "22ea94fc775a3de8d1c1a1905b51d09b236e4c3b", features = ["wgpu", "tiny-skia", "crisp", "web-colors", "thread-pool", "linux-theme-detection", "wayland", "wayland-dlopen", "wayland-decorations", "svg", "a11y", "tokio"], default-features = false }
-enzui-core = { features = ["accesskit"], git = "https://github.com/enz1m/enzui.git", rev = "27d8e8bb1951713ff3c45d6b5a7cb4e2e782c610" }
-enzui-theme = { git = "https://github.com/enz1m/enzui.git", rev = "27d8e8bb1951713ff3c45d6b5a7cb4e2e782c610" }
-enzui-widgets = { features = ["application-dbus"], git = "https://github.com/enz1m/enzui.git", rev = "27d8e8bb1951713ff3c45d6b5a7cb4e2e782c610" }
+iced = { git = "https://github.com/enz1m/enzim-iced.git", rev = "523c1755479c55ba4030dafb2be9c05bf8a1def4", features = ["wgpu", "tiny-skia", "crisp", "web-colors", "thread-pool", "linux-theme-detection", "wayland", "wayland-dlopen", "wayland-decorations", "svg", "a11y", "tokio"], default-features = false }
+enzui-core = { features = ["accesskit"], git = "https://github.com/enz1m/enzui.git", rev = "0ed41783775a9bf1b431a7f5b57f782e30210552" }
+enzui-theme = { git = "https://github.com/enz1m/enzui.git", rev = "0ed41783775a9bf1b431a7f5b57f782e30210552" }
+enzui-widgets = { features = ["application-dbus"], git = "https://github.com/enz1m/enzui.git", rev = "0ed41783775a9bf1b431a7f5b57f782e30210552" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 dirs = "5"
