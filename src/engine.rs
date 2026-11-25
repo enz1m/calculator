@@ -73,6 +73,12 @@ fn finite(value: f64) -> Result<f64, CalcError> {
     }
 }
 
+// `percent` marks a value whose outermost operation is a postfix `%`.
+struct Operand {
+    value: f64,
+    percent: bool,
+}
+
 struct Parser<'a> {
     input: &'a [u8],
     pos: usize,
@@ -100,22 +106,27 @@ impl Parser<'_> {
         }
     }
     fn expression(&mut self, minimum: u8) -> Result<f64, CalcError> {
+        self.operand(minimum).map(|operand| operand.value)
+    }
+    fn operand(&mut self, minimum: u8) -> Result<Operand, CalcError> {
         self.depth += 1;
         if self.depth > 64 {
             return Err(CalcError::TooLong);
         }
-        let mut lhs = if self.take(b'-') {
-            -self.expression(5)?
+        let (mut lhs, mut percent) = if self.take(b'-') {
+            let operand = self.operand(5)?;
+            (-operand.value, operand.percent)
         } else if self.take(b'+') {
-            self.expression(5)?
+            let operand = self.operand(5)?;
+            (operand.value, operand.percent)
         } else if self.take(b'(') {
             let value = self.expression(0)?;
             if !self.take(b')') {
                 return Err(CalcError::Syntax);
             }
-            value
+            (value, false)
         } else {
-            self.atom()?
+            (self.atom()?, false)
         };
         loop {
             self.spaces();
@@ -127,7 +138,8 @@ impl Parser<'_> {
                     break;
                 }
                 self.pos += 1;
-                lhs = if operator == b'%' {
+                percent = operator == b'%';
+                lhs = if percent {
                     lhs / 100.0
                 } else {
                     if !(0.0..=170.0).contains(&lhs) || lhs.fract() != 0.0 {
@@ -147,7 +159,13 @@ impl Parser<'_> {
                 break;
             }
             self.pos += 1;
-            let rhs = self.expression(right)?;
+            let rhs = self.operand(right)?;
+            // A percentage added or subtracted is a share of the left operand.
+            let rhs = match operator {
+                b'+' | b'-' if rhs.percent => lhs * rhs.value,
+                _ => rhs.value,
+            };
+            percent = false;
             lhs = finite(match operator {
                 b'+' => settled_sum(lhs + rhs, lhs.abs().max(rhs.abs())),
                 b'-' => settled_sum(lhs - rhs, lhs.abs().max(rhs.abs())),
@@ -163,7 +181,10 @@ impl Parser<'_> {
             })?;
         }
         self.depth -= 1;
-        finite(lhs)
+        Ok(Operand {
+            value: finite(lhs)?,
+            percent,
+        })
     }
     fn atom(&mut self) -> Result<f64, CalcError> {
         self.spaces();
@@ -318,6 +339,31 @@ mod tests {
         }
         assert!((evaluate("sin(pi/2)", false, 0.0).expect("radians") - 1.0).abs() < 1e-10);
         assert!(evaluate("sin(1e20)", false, 0.0).expect("radians").abs() > 0.1);
+    }
+    #[test]
+    fn percent_after_addition_or_subtraction_scales_the_left_operand() {
+        for (input, shown) in [
+            ("50+10%", "55"),
+            ("50−10%", "45"),
+            ("200-25%", "150"),
+            ("100+10%+10%", "121"),
+            ("100+10%-10%", "99"),
+            ("50+-10%", "45"),
+            ("50×10%", "5"),
+            ("50÷10%", "500"),
+            ("10%", "0.1"),
+            ("50+2*10%", "50.2"),
+            ("50+(10%)", "50.1"),
+            ("50+300%!", "56"),
+            ("2*(50+10%)", "110"),
+            ("3+50+10%", "58.3"),
+        ] {
+            assert_eq!(
+                format_number(evaluate(input, true, 0.0).expect(input)),
+                shown,
+                "{input}"
+            );
+        }
     }
     #[test]
     fn calculator_rejects_invalid_and_unbounded_input() {
